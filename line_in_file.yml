@@ -1,0 +1,28 @@
+---
+
+
+- hosts: all
+  become: true
+  tags: file,centos
+  tasks:
+  - name: start and enable httpd (CentOS)
+    tags: apache,centos,httpd
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+    when: ansible_distribution == "CentOS"
+  - name: change e-mail address for admin
+    tags: apache,centos,httpd
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin'
+      line: ServerAdmin somebody@somewhere.net
+    when: ansible_distribution == "CentOS"
+    register: httpd
+  - name: restart the http
+    service:
+      name: httpd
+      status: restarted
+    when: ansible_distribution == "CentOS"
+    when: httpd.changed
